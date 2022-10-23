@@ -8,6 +8,7 @@ using namespace std;
 struct Resource {
     Resource(char byte)
         : byte_(byte) {}
+    virtual ~Resource() = default;
     char byte() const { return byte_; }
     virtual string name() const = 0;
 
