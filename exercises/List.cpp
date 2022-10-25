@@ -9,48 +9,48 @@ public:
         : next(nullptr),
           value(v) {}
 
-    shared_ptr<Node> next;
+    unique_ptr<Node> next;
     int value;
 };
 
 class List {
 public:
     List();
-    void add(shared_ptr<Node> node);
-    shared_ptr<Node> get(const int value);
+    void add(unique_ptr<Node> node);
+    Node* get(const int value);
 
 private:
-    shared_ptr<Node> first;
+    unique_ptr<Node> first;
 };
 
 List::List()
     : first(nullptr) {}
 
-void List::add(shared_ptr<Node> node) {
+void List::add(unique_ptr<Node> node) {
     if (!first) {
-        first = node;
+        first = move(node);
     } else {
-        shared_ptr<Node> current = first;
+        Node* current = first.get();
         while (current->next) {
-            current = current->next;
+            current = current->next.get();
         }
-        current->next = node;
+        current->next = move(node);
     }
 }
 
-shared_ptr<Node> List::get(const int value) {
+Node* List::get(const int value) {
     if (!first) {
         cout << "List is empty!" << endl;
         return nullptr;
     } else {
-        shared_ptr<Node> current = first;
+        Node* current = first.get();
         do {
             if (current->value == value) {
                 cout << "Found value " << current->value << endl;
                 return current;
             } else {
                 cout << "Going through " << current->value << endl;
-                current = current->next;
+                current = current->next.get();
             }
         } while (current);
         cout << "Not found: value " << value << endl;
@@ -60,13 +60,13 @@ shared_ptr<Node> List::get(const int value) {
 
 int main() {
     List lista;
-    shared_ptr<Node> node4 = make_shared<Node>(4);
-    shared_ptr<Node> node7 = make_shared<Node>(7);
+    unique_ptr<Node> node4 = make_unique<Node>(4);
+    unique_ptr<Node> node7 = make_unique<Node>(7);
 
-    lista.add(node4);
-    lista.add(make_shared<Node>(2));
-    lista.add(node7);
-    lista.add(make_shared<Node>(9));
+    lista.add(move(node4));
+    lista.add(make_unique<Node>(2));
+    lista.add(move(node7));
+    lista.add(make_unique<Node>(9));
     auto node = lista.get(1);
 
     if (node)
