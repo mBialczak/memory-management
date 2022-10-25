@@ -1,4 +1,5 @@
 #include <iostream>
+#include <list>
 #include <memory>
 
 using namespace std;
@@ -17,7 +18,8 @@ class List {
 public:
     List();
     void add(unique_ptr<Node> node);
-    Node* get(const int value);
+    Node* getFirst(const int value);
+    std::list<Node*> getAll(const int value);
 
 private:
     unique_ptr<Node> first;
@@ -38,7 +40,7 @@ void List::add(unique_ptr<Node> node) {
     }
 }
 
-Node* List::get(const int value) {
+Node* List::getFirst(const int value) {
     if (!first) {
         cout << "List is empty!" << endl;
         return nullptr;
@@ -58,6 +60,29 @@ Node* List::get(const int value) {
     }
 }
 
+std::list<Node*> List::getAll(const int value) {
+    std::list<Node*> result_list;
+    if (!first) {
+        cout << "List is empty!" << endl;
+        return result_list;
+    }
+    Node* current = first.get();
+    do {
+        if (current->value == value) {
+            cout << "Found value " << current->value << endl;
+            result_list.push_front(current);
+        } else {
+            cout << "Going through " << current->value << endl;
+        }
+        current = current->next.get();
+    } while (current);
+    if (result_list.empty()) {
+        cout << "Not found: value " << value << endl;
+    }
+
+    return result_list;
+}
+
 int main() {
     List lista;
     unique_ptr<Node> node4 = make_unique<Node>(4);
@@ -65,12 +90,23 @@ int main() {
 
     lista.add(move(node4));
     lista.add(make_unique<Node>(2));
+    lista.add(make_unique<Node>(5));
     lista.add(move(node7));
     lista.add(make_unique<Node>(9));
-    auto node = lista.get(1);
+    lista.add(make_unique<Node>(7));
+    lista.add(make_unique<Node>(5));
+    lista.add(make_unique<Node>(12));
+    lista.add(make_unique<Node>(1));
+    auto node = lista.getFirst(7);
+    lista.add(make_unique<Node>(5));
 
     if (node)
         cout << node->value << '\n';
 
+    auto foundNodes = lista.getAll(5);
+
+    for (const auto& node : foundNodes) {
+        cout << node->value << '\n';
+    }
     return 0;
 }
