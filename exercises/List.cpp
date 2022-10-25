@@ -1,6 +1,7 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <stdexcept>
 
 using namespace std;
 
@@ -12,6 +13,12 @@ public:
 
     unique_ptr<Node> next;
     int value;
+};
+
+class EmptyListError : public runtime_error {
+public:
+    EmptyListError(const std::string& message)
+        : runtime_error(message) {}
 };
 
 class List {
@@ -42,8 +49,7 @@ void List::add(unique_ptr<Node> node) {
 
 Node* List::getFirst(const int value) {
     if (!first) {
-        cout << "List is empty!" << endl;
-        return nullptr;
+        throw EmptyListError("List is empty!\n");
     } else {
         Node* current = first.get();
         do {
@@ -63,8 +69,7 @@ Node* List::getFirst(const int value) {
 std::list<Node*> List::getAll(const int value) {
     std::list<Node*> result_list;
     if (!first) {
-        cout << "List is empty!" << endl;
-        return result_list;
+        throw EmptyListError("List is empty!\n");
     }
     Node* current = first.get();
     do {
@@ -83,7 +88,7 @@ std::list<Node*> List::getAll(const int value) {
     return result_list;
 }
 
-int main() {
+int main(int argc, [[maybe_unused]] const char* argv[]) try {
     List lista;
     unique_ptr<Node> node4 = make_unique<Node>(4);
     unique_ptr<Node> node7 = make_unique<Node>(7);
@@ -108,5 +113,13 @@ int main() {
     for (const auto& node : foundNodes) {
         cout << node->value << '\n';
     }
+    if (argc > 1) {
+        List emptyList{};
+        emptyList.getFirst(12);
+    }
+
     return 0;
+} catch (const exception& ex) {
+    cout << "Exception! " << ex.what();
+    return 1;
 }
