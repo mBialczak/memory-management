@@ -147,7 +147,8 @@ private:
     void freeCurrentOwnership();
 
     ControlBlock* ctrlBlock_;
-    Type* ptr_;
+    // TODO: VERIFY
+    //  Type* ptr_;
 };
 
 template <typename Type>
@@ -155,18 +156,26 @@ struct shared_ptr<Type>::ControlBlock {
     ControlBlock(size_t sharedCount = 0,
                  size_t weakCount = 0,
                  DeleterType deleter = defaultDelete<Type>)
-        : sharedCount_{sharedCount},
-          weakCount{weakCount},
-          deleter_{deleter} {}
+        //                  : sharedCount_(sharedCount),
+        //   weakCount(weakCount),
+        //   deleter_(deleter) {
+        : sharedCount_(sharedCount),
+          weakCount(weakCount),
+          deleter_(deleter),
+          ptr_(nullptr) {}
 
     std::atomic<size_t> sharedCount_;
     std::atomic<size_t> weakCount;
     DeleterType deleter_;
+    // TODO: VERIFY
+    Type* ptr_;
 };
 
 template <typename Type>
 constexpr shared_ptr<Type>::shared_ptr() noexcept
-    : ctrlBlock_{nullptr}, ptr_{nullptr} {
+    // TODO: VERIFY
+    //  : ctrlBlock_{nullptr}, ptr_{nullptr} {
+    : ctrlBlock_{nullptr} {
 }
 
 template <typename Type>
@@ -184,20 +193,32 @@ shared_ptr<Type>::shared_ptr(std::nullptr_t, Deleter)
 template <typename Type>
 template <typename OtherType, typename>
 shared_ptr<Type>::shared_ptr(OtherType* ptr)
-    : ctrlBlock_(new ControlBlock{1, 0}),
-      ptr_(static_cast<Type*>(ptr)) {
+    // TODO: VERIFY
+    //  : ctrlBlock_(new ControlBlock{1, 0}),
+    : ctrlBlock_(new ControlBlock{1, 0})
+// TODO: VERIFY
+//    ptr_(static_cast<Type*>(ptr)) {
+{
+    ctrlBlock_->ptr_ = ptr;
 }
 
 template <typename Type>
 template <class OtherType, class Deleter, typename>
 shared_ptr<Type>::shared_ptr(OtherType* ptr, Deleter deleter)
-    : ctrlBlock_(new ControlBlock{1, 0, deleter}),
-      ptr_(static_cast<Type*>(ptr)) {
+    // TODO: VERIFY
+    //  : ctrlBlock_(new ControlBlock{1, 0, deleter}),
+    : ctrlBlock_(new ControlBlock{1, 0, deleter})
+// TODO: VERIFY
+//    ptr_(static_cast<Type*>(ptr)) {
+{
+    ctrlBlock_->ptr_ = ptr;
 }
 
 template <typename Type>
 Type* shared_ptr<Type>::get() const noexcept {
-    return ptr_;
+    // TODO: VERIFY
+    //  return  ptr_;
+    return ctrlBlock_->ptr_;
 }
 
 template <typename Type>
@@ -223,8 +244,12 @@ long shared_ptr<Type>::use_count() const noexcept {
 
 template <typename Type>
 shared_ptr<Type>::shared_ptr(const shared_ptr& other) noexcept
-    : ctrlBlock_(other.ctrlBlock_), ptr_(other.ptr_) {
-    if (ptr_) {
+    // TODO: VERIFY
+    //  : ctrlBlock_(other.ctrlBlock_), ptr_(other.ptr_) {
+    : ctrlBlock_(other.ctrlBlock_) {
+    // TODO: VERIFY
+    //  if (ptr_) {
+    if (ctrlBlock_->ptr_) {
         ctrlBlock_->sharedCount_ += 1;
     }
 }
@@ -232,35 +257,47 @@ shared_ptr<Type>::shared_ptr(const shared_ptr& other) noexcept
 template <typename Type>
 template <typename OtherType, typename>
 shared_ptr<Type>::shared_ptr(const shared_ptr<OtherType>& other) noexcept
-    : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
-      ptr_(other.get()) {
-    if (ptr_) {
+    // TODO: VERIFY
+    //  : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
+    //    ptr_(other.get()) {
+    : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)) {
+    ctrlBlock_->ptr = other.ctrlBlock_->ptr;
+    if (ctrlBlock_->ptr) {
         ctrlBlock_->sharedCount_ += 1;
     }
 }
 
 template <typename Type>
 shared_ptr<Type>::shared_ptr(shared_ptr&& other) noexcept
-    : ctrlBlock_(other.ctrlBlock_),
-      ptr_(other.ptr_) {
-    other.ptr_ = nullptr;
+    // TODO: VERIFY
+    // : ctrlBlock_(other.ctrlBlock_),
+    : ctrlBlock_(other.ctrlBlock_)
+//    ptr_(other.ptr_) {
+{  // TODO: VERIFY
+    // other.ptr_ = nullptr;
     other.ctrlBlock_ = nullptr;
 }
 
 template <typename Type>
 template <typename OtherType, typename>
 shared_ptr<Type>::shared_ptr(shared_ptr<OtherType>&& other) noexcept
-    : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
-      ptr_(other.ptr_) {
-    other.ptr_ = nullptr;
+    // TODO: VERIFY
+    //  : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
+    : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_))
+//   ptr_(other.ptr_) {
+{
+    // other.ptr_ = nullptr;
     other.ctrlBlock_ = nullptr;
 }
 
 template <typename Type>
 template <typename OtherType, typename>
 shared_ptr<Type>::shared_ptr(const weak_ptr<OtherType>& other)
-    : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
-      ptr_(other.ptr_) {
+    // TODO: VERIFY
+    //  : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
+    : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_))
+//   ptr_(other.ptr_) {
+{
     if (ctrlBlock_) {
         ctrlBlock_->sharedCount_++;
     }
@@ -279,8 +316,8 @@ shared_ptr<Type>& shared_ptr<Type>::operator=(const shared_ptr& other) noexcept 
     }
 
     freeCurrentOwnership();
-
-    ptr_ = other.ptr_;
+    // TODO: VERIFY
+    //  ptr_ = other.ptr_;
     ctrlBlock_ = other.ctrlBlock_;
     ctrlBlock_->sharedCount_++;
 
@@ -295,8 +332,8 @@ shared_ptr<Type>& shared_ptr<Type>::operator=(const shared_ptr<OtherType>& other
     }
 
     freeCurrentOwnership();
-
-    ptr_ = other.get();
+    // TODO: VERIFY
+    //  ptr_ = other.get();
     ctrlBlock_ = reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_);
     ctrlBlock_->sharedCount_++;
 
@@ -310,11 +347,11 @@ shared_ptr<Type>& shared_ptr<Type>::operator=(shared_ptr&& other) noexcept {
     }
 
     freeCurrentOwnership();
-
-    ptr_ = other.get();
+    // TODO: VERIFY
+    //  ptr_ = other.get();
     ctrlBlock_ = other.ctrlBlock_;
-
-    other.ptr_ = nullptr;
+    // TODO: VERIFY
+    //  other.ptr_ = nullptr;
     other.ctrlBlock_ = nullptr;
 
     return *this;
@@ -328,11 +365,11 @@ shared_ptr<Type>& shared_ptr<Type>::operator=(shared_ptr<OtherType>&& other) noe
     }
 
     freeCurrentOwnership();
-
-    ptr_ = other.get();
+    // TODO: VERIFY
+    //  ptr_ = other.get();
     ctrlBlock_ = reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_);
-
-    other.ptr_ = nullptr;
+    // TODO: VERIFY
+    //  other.ptr_ = nullptr;
     other.ctrlBlock_ = nullptr;
 
     return *this;
@@ -340,18 +377,39 @@ shared_ptr<Type>& shared_ptr<Type>::operator=(shared_ptr<OtherType>&& other) noe
 
 template <typename Type>
 void shared_ptr<Type>::freeCurrentOwnership() {
-    if (ptr_) {
+    // TODO: VERIFY
+    //  if (ptr_) {
+    //      ctrlBlock_->sharedCount_--;
+
+    //     if (ctrlBlock_->sharedCount_ == 0) {
+    //         ctrlBlock_->deleter_(ptr_);
+
+    //         if (ctrlBlock_->weakCount == 0) {
+    //             delete ctrlBlock_;
+    //             ctrlBlock_ = nullptr;
+    //         }
+    //     }
+    //     ptr_ = nullptr;
+    // }
+    // // TODO: VERIFY perhaps needed to prevent leaks
+    // else {
+    //     if (ctrlBlock_ && ctrlBlock_->weakCount == 0) {
+    //         delete ctrlBlock_;
+    //         ctrlBlock_ = nullptr;
+    //     }
+    // }
+    if (ctrlBlock_->ptr_) {
         ctrlBlock_->sharedCount_--;
 
         if (ctrlBlock_->sharedCount_ == 0) {
-            ctrlBlock_->deleter_(ptr_);
+            ctrlBlock_->deleter_(ctrlBlock_->ptr_);
 
             if (ctrlBlock_->weakCount == 0) {
                 delete ctrlBlock_;
                 ctrlBlock_ = nullptr;
             }
         }
-        ptr_ = nullptr;
+        ctrlBlock_->ptr_ = nullptr;
     }
     // TODO: VERIFY perhaps needed to prevent leaks
     else {
@@ -364,17 +422,23 @@ void shared_ptr<Type>::freeCurrentOwnership() {
 
 template <typename Type>
 shared_ptr<Type>::operator bool() const noexcept {
-    return static_cast<bool>(ptr_);
+    // TODO: VERIFY
+    //  return static_cast<bool>(ptr_);
+    return static_cast<bool>(ctrlBlock_->ptr_);
 }
 
 template <typename Type>
 Type& shared_ptr<Type>::operator*() const noexcept {
-    return *ptr_;
+    // TODO: VERIFY
+    //  return *ptr_;
+    return *(ctrlBlock_->ptr_);
 }
 
 template <typename Type>
 Type* shared_ptr<Type>::operator->() const noexcept {
-    return ptr_;
+    // TODO: VERIFY
+    //  return ptr_;
+    return ctrlBlock_->ptr_;
 }
 
 template <typename Type>
@@ -386,23 +450,33 @@ void shared_ptr<Type>::reset() noexcept {
 template <typename Type>
 template <typename OtherType, typename>
 void shared_ptr<Type>::reset(OtherType* ptr) {
-    freeCurrentOwnership();
-    ptr_ = ptr;
+    // TODO: VERIFY
+    //  freeCurrentOwnership();
+    //  ptr_ = ptr;
 
-    if (ptr_) {
-        ctrlBlock_ = new ControlBlock(1, 0);
-    }
+    // if (ptr_) {
+    //     ctrlBlock_ = new ControlBlock(1, 0);
+    // }
+
+    freeCurrentOwnership();
+    ctrlBlock_ = new ControlBlock(1, 0);
+    ctrlBlock_->ptr_ = ptr;
 }
 
 template <typename Type>
 template <typename OtherType, typename Deleter, typename>
 void shared_ptr<Type>::reset(OtherType* ptr, Deleter deleter) {
-    freeCurrentOwnership();
-    ptr_ = ptr;
+    // TODO: VERIFY
+    //  freeCurrentOwnership();
+    //  ptr_ = ptr;
 
-    if (ptr_) {
-        ctrlBlock_ = new ControlBlock(1, 0, deleter);
-    }
+    // if (ptr_) {
+    //     ctrlBlock_ = new ControlBlock(1, 0, deleter);
+    // }
+
+    freeCurrentOwnership();
+    ctrlBlock_ = new ControlBlock(1, 0, deleter);
+    ctrlBlock_->ptr_ = ptr;
 }
 
 }  // namespace my
