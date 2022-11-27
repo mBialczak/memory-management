@@ -67,6 +67,9 @@ private:
 
 template <typename Type>
 constexpr weak_ptr<Type>::weak_ptr() noexcept
+    // TODO: VERIFY
+    //  : ctrlBlock_(nullptr),
+    //    ptr_(nullptr) {
     : ctrlBlock_(nullptr),
       ptr_(nullptr) {
 }
@@ -74,10 +77,13 @@ constexpr weak_ptr<Type>::weak_ptr() noexcept
 template <typename Type>
 template <class OtherType, typename>
 weak_ptr<Type>::weak_ptr(const shared_ptr<OtherType>& other) noexcept
-    : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
-      ptr_(other.ptr_) {
+    // TODO: VERIFY
+    //  : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
+    //    ptr_(other.ptr_) {
+    : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)) {
     if (ctrlBlock_) {
-        ctrlBlock_->weakCount++;
+        ptr_ = (other.ctrlBlock_->ptr_);
+        ctrlBlock_->weakCount_++;
     }
 }
 
@@ -85,8 +91,11 @@ template <typename Type>
 weak_ptr<Type>::weak_ptr(const weak_ptr& other) noexcept
     : ctrlBlock_(other.ctrlBlock_),
       ptr_(other.ptr_) {
+    // TODO: VERIFY
+    // : ctrlBlock_(other.ctrlBlock_),
+    //   ptr_(other.ctrlBlock_->ptr_) {
     if (ctrlBlock_) {
-        ctrlBlock_->weakCount++;
+        ctrlBlock_->weakCount_++;
     }
 }
 
@@ -95,8 +104,11 @@ template <class OtherType, typename>
 weak_ptr<Type>::weak_ptr(const weak_ptr<OtherType>& other) noexcept
     : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
       ptr_(other.ptr_) {
+    // TODO: VERIFY
+    // : ctrlBlock_(reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_)),
+    //   ptr_(other.ctrlBlock_->ptr_) {
     if (ctrlBlock_) {
-        ctrlBlock_->weakCount++;
+        ctrlBlock_->weakCount_++;
     }
 }
 
@@ -122,11 +134,14 @@ weak_ptr<Type>::~weak_ptr() {
     reset();
 }
 
+// TODO: VERIFY might need huge rethink
 template <class Type>
 void weak_ptr<Type>::reset() noexcept {
     if (ctrlBlock_) {
-        ctrlBlock_->weakCount--;
-        if (ctrlBlock_->weakCount == 0) {
+        ctrlBlock_->weakCount_--;
+        if (ctrlBlock_->weakCount_ == 0
+            // TODO: VERIFY
+            && ctrlBlock_->sharedCount_ == 0) {
             delete ctrlBlock_;
         }
     }
@@ -139,7 +154,7 @@ weak_ptr<Type>& weak_ptr<Type>::operator=(const weak_ptr& other) noexcept {
     ctrlBlock_ = other.ctrlBlock_;
     ptr_ = other.ptr_;
     if (ctrlBlock_) {
-        ctrlBlock_->weakCount++;
+        ctrlBlock_->weakCount_++;
     }
     return *this;
 }
@@ -150,7 +165,7 @@ weak_ptr<Type>& weak_ptr<Type>::operator=(const weak_ptr<OtherType>& other) noex
     ctrlBlock_ = reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_);
     ptr_ = other.ptr_;
     if (ctrlBlock_) {
-        ctrlBlock_->weakCount++;
+        ctrlBlock_->weakCount_++;
     }
 
     return *this;
@@ -159,10 +174,14 @@ weak_ptr<Type>& weak_ptr<Type>::operator=(const weak_ptr<OtherType>& other) noex
 template <class Type>
 template <class OtherType, typename>
 weak_ptr<Type>& weak_ptr<Type>::operator=(const shared_ptr<OtherType>& other) noexcept {
+    // TODO: VERIFY
+    //  ctrlBlock_ = reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_);
+    //  ptr_ = other.ptr_;
     ctrlBlock_ = reinterpret_cast<shared_ptr<Type>::ControlBlock*>(other.ctrlBlock_);
-    ptr_ = other.ptr_;
+
     if (ctrlBlock_) {
-        ctrlBlock_->weakCount++;
+        ptr_ = other.ctrlBlock_->ptr_;
+        ctrlBlock_->weakCount_++;
     }
 
     return *this;

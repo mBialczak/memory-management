@@ -6,7 +6,7 @@
 namespace tests {
 
 TEST(MakeSharedShould, createSharedPtrFromGivenArguments) {
-    [[maybe_unused]] my::shared_ptr<int> = my::make_shared(100);
+    // [[maybe_unused]] my::shared_ptr<int> = my::make_shared(100);
 }
 
 }  // namespace tests

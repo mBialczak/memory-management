@@ -324,17 +324,18 @@ TEST(SharedPtrsMoveConstructorTakingConvertibleSourceShould, setManagedPtrOfSour
 TEST(SharedPtrsConstructorFromWeakPtrShould, copyPtrFromWeakPtr) {
     my::shared_ptr<float> sut_original{new float};
     my::weak_ptr<float> weak_from_original{sut_original};
-    ASSERT_EQ(sut_original.use_count(), 1);
+    // TODO: VERIFY
+    ASSERT_NE(sut_original.get(), nullptr);
 
     my::shared_ptr<float> sut_from_weak{weak_from_original};
 
-    EXPECT_EQ(*sut_from_weak, *sut_original);
+    EXPECT_EQ(sut_from_weak.get(), sut_original.get());
 }
-
+// TODO: VERIFY based on same for normal type
 TEST(SharedPtrsConstructorFromWeakPtrToConvertibleTypeShould, copyPtrFromWeakPtr) {
     my::shared_ptr<DummyDerived> sut_original{new DummyDerived};
     my::weak_ptr<DummyDerived> weak_from_original{sut_original};
-    ASSERT_EQ(sut_original.use_count(), 1);
+    ASSERT_NE(sut_original.get(), nullptr);
 
     my::shared_ptr<DummyBase> sut_from_weak{weak_from_original};
 
@@ -442,7 +443,7 @@ TEST(SharedPtrUseCountShould, returnNumberOfSharedPointersSharingResource) {
 TEST(SharedPtrDestructorShould, destroyManagedObjecIfNoDeleterSpecifiedAndLastInstanceDestroyed) {
     my::shared_ptr<DeleteCallDetectorMock> sut(new DeleteCallDetectorMock);
     DeleteCallDetectorMock* testMock = sut.get();
-
+    // TODO: VERIFY
     EXPECT_CALL(*testMock, detectDeleteCall);
 }
 
