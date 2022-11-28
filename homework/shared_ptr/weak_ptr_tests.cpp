@@ -13,7 +13,7 @@ public:
 
 class DummyDerived : public DummyBase {};
 
-// constructor tests
+// // constructor tests
 TEST(WeakPtrShould, bePossibleToBeCratedUsingDefaultConstructor) {
     [[maybe_unused]] my::weak_ptr<int> sut{};
     [[maybe_unused]] my::weak_ptr<double> sut2{};
@@ -462,7 +462,7 @@ TEST(WeakPtrMoveAssignmentTakingWeakPtrToConvertibleTypeShould, takeOverUseCount
     EXPECT_EQ(sut_for_moving.use_count(), 0);
 }
 
-// other functions tests
+// // other functions tests
 TEST(WeakPtrsUseCountShould, returnNumberOfSharedPtrsOwningManagedPtr) {
     my::shared_ptr<double> shared{new double{1.0}};
     my::shared_ptr<double> shared_null{};

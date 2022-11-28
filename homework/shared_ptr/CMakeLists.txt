@@ -59,25 +59,26 @@ target_compile_features(weak_ptr-tests
                         cxx_std_20)
 
 # adding make_shared tests
-add_executable(make_shared-tests
-               make_shared_tests.cpp
-)
+# add_executable(make_shared-tests
+#                make_shared_tests.cpp
+# )
 
-target_link_libraries(make_shared-tests
-                      gtest_main
-                      gmock_main
-)
+# target_link_libraries(make_shared-tests
+#                       gtest_main
+#                       gmock_main
+# )
 
-target_compile_options(make_shared-tests
-                       PRIVATE
-                       -Wall
-                       -Wextra
-                       -pedantic)
+# target_compile_options(make_shared-tests
+#                        PRIVATE
+#                        -Wall
+#                        -Wextra
+#                        -pedantic)
 
-target_compile_features(make_shared-tests
-                        PRIVATE
-                        cxx_std_20)
+# target_compile_features(make_shared-tests
+#                         PRIVATE
+#                         cxx_std_20)
 
 
 gtest_discover_tests(shared_ptr-tests)
 gtest_discover_tests(weak_ptr-tests)
+# gtest_discover_tests((make_shared-tests)

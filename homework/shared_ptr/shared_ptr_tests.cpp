@@ -166,6 +166,27 @@ TEST(SharedPtrConstructorTakingConvertiblePointerShould,
     my::shared_ptr<DummyBase> sut{new DummyDerived};
     EXPECT_EQ(sut.use_count(), 1);
 }
+
+// tests for constructor taking pointer to convertible type and deleter
+TEST(SharedPtrShould, bePossibleToBeCreatedWhenPassedConvertiblePointerForCustomDeleterUsed) {
+    [[maybe_unused]] my::shared_ptr<DummyBase> sut{new DummyDerived, customDeleter<DummyBase>};
+}
+
+TEST(SharedPtrConstructorTakingConvertiblePointerAndCustomDeleterShould,
+     storePtrPassedDuringConstruction) {
+    DummyDerived* ptr = new DummyDerived;
+    my::shared_ptr<DummyBase> sut{ptr, customDeleter<DummyBase>};
+
+    EXPECT_EQ(sut.get(), ptr);
+    EXPECT_THAT(sut.get(), A<DummyBase*>());
+}
+
+TEST(SharedPtrConstructorTakingConvertiblePointerAndCustomDeleterShould,
+     haveUseCountEqualToOneAfterConstruction) {
+    my::shared_ptr<DummyBase> sut{new DummyDerived, customDeleter<DummyBase>};
+    EXPECT_EQ(sut.use_count(), 1);
+}
+
 // tests for copy constructor taking shared_ptr to same type
 TEST(SharedPtrsCopyConstructorShould, copyTheValueOfPtrOfSource) {
     my::shared_ptr<double> null_sut{nullptr};
@@ -195,26 +216,6 @@ TEST(SharedPtrsCopyConstructorShould, increaseSharedCounterIfSourceHadManagedObj
     EXPECT_EQ(sut_copy2.use_count(), 3);
     EXPECT_EQ(sut_copy.use_count(), 3);
     EXPECT_EQ(sut.use_count(), 3);
-}
-
-// tests for constructor taking pointer to convertible type and deleter
-TEST(SharedPtrShould, bePossibleToBeCreatedWhenPassedConvertiblePointerForCustomDeleterUsed) {
-    [[maybe_unused]] my::shared_ptr<DummyBase> sut{new DummyDerived, customDeleter<DummyBase>};
-}
-
-TEST(SharedPtrConstructorTakingConvertiblePointerAndCustomDeleterShould,
-     storePtrPassedDuringConstruction) {
-    DummyDerived* ptr = new DummyDerived;
-    my::shared_ptr<DummyBase> sut{ptr, customDeleter<DummyBase>};
-
-    EXPECT_EQ(sut.get(), ptr);
-    EXPECT_THAT(sut.get(), A<DummyBase*>());
-}
-
-TEST(SharedPtrConstructorTakingConvertiblePointerAndCustomDeleterShould,
-     haveUseCountEqualToOneAfterConstruction) {
-    my::shared_ptr<DummyBase> sut{new DummyDerived, customDeleter<DummyBase>};
-    EXPECT_EQ(sut.use_count(), 1);
 }
 
 TEST(SharedPtrsCopyConstructorShould, notIncreaseSharedCounterIfSourceDidNotManageAnyObject) {
@@ -331,7 +332,7 @@ TEST(SharedPtrsConstructorFromWeakPtrShould, copyPtrFromWeakPtr) {
 
     EXPECT_EQ(sut_from_weak.get(), sut_original.get());
 }
-// TODO: VERIFY based on same for normal type
+
 TEST(SharedPtrsConstructorFromWeakPtrToConvertibleTypeShould, copyPtrFromWeakPtr) {
     my::shared_ptr<DummyDerived> sut_original{new DummyDerived};
     my::weak_ptr<DummyDerived> weak_from_original{sut_original};
@@ -443,7 +444,7 @@ TEST(SharedPtrUseCountShould, returnNumberOfSharedPointersSharingResource) {
 TEST(SharedPtrDestructorShould, destroyManagedObjecIfNoDeleterSpecifiedAndLastInstanceDestroyed) {
     my::shared_ptr<DeleteCallDetectorMock> sut(new DeleteCallDetectorMock);
     DeleteCallDetectorMock* testMock = sut.get();
-    // TODO: VERIFY
+
     EXPECT_CALL(*testMock, detectDeleteCall);
 }
 
